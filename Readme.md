@@ -1,0 +1,1 @@
+# Dobókocka detekció - képfeldolgozás projekt
