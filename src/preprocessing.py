@@ -34,8 +34,8 @@ def process_image(path):
     if shape[0] / shape[1] != 0.75:
         return -1
     if shape[0] > dest_shape[0] and shape[1] > dest_shape[1]:
-        scale = shape[0] / dest_shape[0]
-        image = cv2.resize(image, dest_shape)
+        scale = dest_shape[0] / shape[0]
+        image = cv2.resize(image, (dest_shape[1], dest_shape[0]))
         label_data_int = [int(item * scale) for item in label_data_int]
     cv2.imwrite(f'{resdir}{"_".join(str(item) for item in label_data_int)}.png', image)
     return image
