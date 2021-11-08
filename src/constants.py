@@ -1,0 +1,16 @@
+IMAGES_PATH = "../res/preprocessed"
+
+TRAIN_WIDTH = 450
+TRAIN_HEIGHT = 600
+
+HIDDEN_LAYER_ACTIVATION = 'relu'
+OUTPUT_LAYER_ACTIVATION = 'linear'
+
+OPTIMIZER = 'adam'
+METRICS = 'mean_squared_error'
+
+BATCH_SIZE = 8
+EPOCHS = 20
+VERBOSE = 1
+
+OUTPUT_NEURON_NUMBER = 8
