@@ -44,8 +44,9 @@ df_train = df[0:train_cut]
 df_validation = df[train_cut:(train_cut+validation_cut)]
 df_test = df[(train_cut+validation_cut):]
 
-column_names_without_filename = copy.deepcopy(COLUMN_NAMES)
-column_names_without_filename.pop()
+column_names_without_filename_and_id = copy.deepcopy(COLUMN_NAMES)
+column_names_without_filename_and_id.pop()
+column_names_without_filename_and_id.pop(0)
 
 print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Creating the generator...")
 
@@ -57,8 +58,9 @@ train_generator = training_datagen.flow_from_dataframe(
     dataframe=df_train,
     directory=os.getcwd()+"\\\\"+csv_handler.FROM_DATA_TO_PREPROCESSED_PATH,
     x_col=COLUMN_NAMES[-1],
-    y_col=column_names_without_filename,
+    y_col=column_names_without_filename_and_id,
     target_size=(TRAIN_WIDTH, TRAIN_HEIGHT),
+    color_mode="grayscale",
     class_mode="other",
     batch_size=BATCH_SIZE,
     shuffle=True,
@@ -73,8 +75,9 @@ validation_generator = validation_datagen.flow_from_dataframe(
     dataframe=df_validation,
     directory=os.getcwd()+"\\\\"+csv_handler.FROM_DATA_TO_PREPROCESSED_PATH,
     x_col=COLUMN_NAMES[-1],
-    y_col=column_names_without_filename,
+    y_col=column_names_without_filename_and_id,
     target_size=(TRAIN_WIDTH, TRAIN_HEIGHT),
+    color_mode="grayscale",
     class_mode="other",
     batch_size=BATCH_SIZE,
     shuffle=True,
@@ -89,8 +92,9 @@ test_generator = test_datagen.flow_from_dataframe(
     dataframe=df_test,
     directory=os.getcwd()+"\\\\"+csv_handler.FROM_DATA_TO_PREPROCESSED_PATH,
     x_col=COLUMN_NAMES[-1],
-    y_col=column_names_without_filename,
+    y_col=column_names_without_filename_and_id,
     target_size=(TRAIN_WIDTH, TRAIN_HEIGHT),
+    color_mode="grayscale",
     class_mode="other",
     batch_size=1,
     shuffle=True,

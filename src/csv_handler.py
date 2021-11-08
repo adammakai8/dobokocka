@@ -72,7 +72,7 @@ def create_csv():
         writer = csv.DictWriter(file, fieldnames=COLUMN_NAMES)
         writer.writeheader()
         for image in normalized_vectors:
-            row = {"ID": _id}
+            row = {}
             index = 1
             for element in image:
                 row[COLUMN_NAMES[index]] = element
