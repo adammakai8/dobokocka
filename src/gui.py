@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 import sys
 import os
+import cv2
+import preprocessing as prep
 
 
 class DicePointCounter(QWidget):
@@ -18,7 +20,7 @@ class DicePointCounter(QWidget):
 
         self.file_path = QtWidgets.QTextEdit()
         self.file_path.setDisabled(True)
-        self.file_path.setFixedWidth(240)
+        self.file_path.setFixedWidth(320)
         self.file_path.setMaximumHeight(32)
         self.file_controls.addWidget(self.file_path)
 
@@ -30,26 +32,35 @@ class DicePointCounter(QWidget):
         self.gui_container.addLayout(self.file_controls)
 
         self.pic_priview = QtWidgets.QLabel()
-        self.pic_priview.setMinimumHeight(150)
+        self.pic_priview.setMinimumHeight(300)
         self.gui_container.addWidget(self.pic_priview)
 
         self.count_button = QtWidgets.QPushButton()
         self.count_button.setText('Érték Számolása')
-        self.count_button.clicked.connect()
+        self.count_button.clicked.connect(self.do_count)
         self.gui_container.addWidget(self.count_button)
 
         self.setLayout(self.gui_container)
         self.setWindowTitle('Dice Point Count')
 
+        self.filename = ''
+
     def open_file_clicked(self):
-        filename = QFileDialog.getOpenFileName(self, 'Kép megnyitása', os.getcwd(), 'Image files (*.jpg *.gif)')
-        pic = QtGui.QPixmap(filename[0])
-        pic = pic.scaledToWidth(200)
+        self.filename = QFileDialog.getOpenFileName(self, 'Kép megnyitása', os.getcwd(), 'Image files (*.jpg *.gif)')
+        self.file_path.setText(self.filename[0])
+        pic = QtGui.QPixmap(self.filename[0])
+        pic = pic.scaledToWidth(450)
         self.pic_priview.setPixmap(pic)
 
     def do_count(self):
         # TODO: funkció implementálása
-        pass
+        if self.filename == '':
+            return
+        else:
+            image, labels = prep.process_image(self.filename[0])
+            cv2.imshow('image', image)
+            cv2.waitKey()
+            cv2.destroyWindow('image')
 
 
 def main():

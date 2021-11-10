@@ -3,10 +3,10 @@
 import cv2
 from os import listdir
 
-imgs = '../res/images/'
-resdir = '../res/preprocessed/'
+IMG_PATH = '../res/images/'
+RESDIR_PATH = '../res/preprocessed/'
 
-dest_shape = (450, 600)
+DEST_SHAPE = (450, 600)
 
 
 def process_image(path):
@@ -15,9 +15,15 @@ def process_image(path):
     :param path: a kép fájlneve elérési út nélkül
     :return: a feldolgozott kép
     """
-    label_data = path.split('.')[0].split('_')
+    if path.count('/') > 0 or path.count('\\') > 0:
+        path.replace('\\', '/')
+        image_name = path.split('/')[-1]
+    else:
+        image_name = path
+        path = f'{IMG_PATH}{path}'
+    label_data = image_name.split('.')[0].split('_')
     label_data_int = [int(item) for item in label_data]
-    image = cv2.imread(f'{imgs}{path}')
+    image = cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     shape = image.shape
     if shape[0] > shape[1]:
@@ -33,17 +39,18 @@ def process_image(path):
             label_data_int[i + 3] = x2
     if shape[0] / shape[1] != 0.75:
         return -1
-    if shape[0] > dest_shape[0] and shape[1] > dest_shape[1]:
-        scale = dest_shape[0] / shape[0]
-        image = cv2.resize(image, (dest_shape[1], dest_shape[0]))
+    if shape[0] > DEST_SHAPE[0] and shape[1] > DEST_SHAPE[1]:
+        scale = DEST_SHAPE[0] / shape[0]
+        image = cv2.resize(image, (DEST_SHAPE[1], DEST_SHAPE[0]))
         label_data_int = [int(item * scale) for item in label_data_int]
-    cv2.imwrite(f'{resdir}{"_".join(str(item) for item in label_data_int)}.png', image)
-    return image
+    return image, label_data_int
 
 
 def process_all():
-    for picture in listdir(imgs):
-        process_image(picture)
+    for path in listdir(IMG_PATH):
+        image, label_data_int = process_image(path)
+        cv2.imwrite(f'{RESDIR_PATH}{"_".join(str(item) for item in label_data_int)}.png', image)
+
 
 # Ha az összes feldolgozatlan képet szeretnénk előfeldolgozni, akkor kommenteljük ki az alsó sort
 # process_all()
