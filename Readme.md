@@ -1,6 +1,6 @@
 # Dobókocka detekció - képfeldolgozás projekt
 
-A tesztképek ezen a linken érhetők el: https://makeml.app/datasets/dice
+A tesztképek ezen a linken érhetők el (hozzáférés kérése szükséges): https://drive.google.com/drive/folders/1oou7K965xHddyZozB7oipXCWmx-4ZjOY?usp=sharing
 
 Miután letöltöttétek a repository-t, a következőképp nézzen ki a mappaszerkezet:
  - res
