@@ -1,30 +1,25 @@
 import os
-import random
 import copy
 from datetime import datetime
 
-import cv2
-import numpy as np
 import pandas as pd
 
 from tensorflow import keras
 from tensorflow.keras import layers
-import keras_preprocessing
 from keras_preprocessing.image import ImageDataGenerator
-import h5py
 
 import csv_handler
-
-# const variables
 
 from constants import IMAGES_PATH, TRAIN_WIDTH, TRAIN_HEIGHT, HIDDEN_LAYER_ACTIVATION, \
     OUTPUT_NEURON_NUMBER, OUTPUT_LAYER_ACTIVATION, METRICS, EPOCHS, BATCH_SIZE
 from csv_handler import COLUMN_NAMES
 
+# const variables
+
+MODEL_FILE = "model.txt"
+
 _TRAIN_PCT = 0.8
 _VALIDATION_PCT = 0.1
-
-# variables
 
 print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Preloading...")
 
@@ -103,37 +98,111 @@ test_generator = test_datagen.flow_from_dataframe(
 
 # create the model
 
-model = keras.Sequential([
-    layers.Dropout(0.2, input_shape=(TRAIN_WIDTH, TRAIN_HEIGHT, 1)),
-    layers.AveragePooling2D(2, 2),
-    layers.Conv2D(16, 3, activation=HIDDEN_LAYER_ACTIVATION),
-    layers.AveragePooling2D(2, 2),
-    layers.Conv2D(32, 3, activation=HIDDEN_LAYER_ACTIVATION),
-    layers.AveragePooling2D(2, 2),
-    layers.Conv2D(64, 3, activation=HIDDEN_LAYER_ACTIVATION),
-    layers.Dropout(0.5),
-    layers.Flatten(),
-    layers.Dense(512, activation=HIDDEN_LAYER_ACTIVATION),
-    layers.Dropout(0.2),
-    layers.Dense(OUTPUT_NEURON_NUMBER, activation=OUTPUT_LAYER_ACTIVATION)
-])
+dropout1 = [0.1, 0.2, 0.3]
+dropout2 = [0.3, 0.4, 0.5]
+dropout3 = [0.2, 0.3, 0.4]
+dropout4 = [0.2, 0.3, 0.4]
 
-# train on the model
+conv2d1 = [8, 16, 32, 64]
+conv2d2 = [16, 32, 64]
+conv2d3 = [32, 64]
 
-print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Compile the model")
+dense1 = [128, 256, 512, 1024]
+dense2 = [256, 512, 1024]
 
-model.compile(
-    optimizer=keras.optimizers.Adam(0.01),
-    loss=keras.losses.MeanSquaredError(),
-    metrics=[METRICS])
+learning_rate = [0.01, 0.007, 0.004, 0.002, 0.001, 0.0007, 0.0004, 0.0002, 0.0001]
 
-print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Starting the search")
+model_dict = {}
+best_model = 0
+best_val_accuracy = 0
 
-model.fit(
-    train_generator,
-    epochs=EPOCHS,
-    validation_data=validation_generator,
-    callbacks=[keras.callbacks.EarlyStopping(monitor='val_loss', patience=2, mode="min")]
-)
+try:
+    for de1 in range(4):
+        for cv2d1 in range(4):
+            for cv2d3 in range(2):
+                for cv2d2 in range(3):
+                    for cv2dn in range(3):
+                        for d2 in range(3):
+                            for de2 in range(3):
+                                for d4 in range(3):
+                                    for de in range(2):
+                                        for d1 in range(3):
+                                            for d3 in range(3):
+                                                for lr in range(9):
+                                                    model = keras.Sequential([
+                                                        layers.Dropout(dropout1[d1],
+                                                                       input_shape=(TRAIN_WIDTH, TRAIN_HEIGHT, 1)),
+                                                        layers.AveragePooling2D(2, 2),
+                                                        layers.Conv2D(conv2d1[cv2d1], 3,
+                                                                      activation=HIDDEN_LAYER_ACTIVATION)
+                                                    ])
+                                                    if cv2dn >= 1:
+                                                        model.add(layers.AveragePooling2D(2, 2))
+                                                        model.add(layers.Conv2D(conv2d2[cv2d2], 3,
+                                                                                activation=HIDDEN_LAYER_ACTIVATION))
+                                                    if cv2dn >= 2:
+                                                        model.add(layers.AveragePooling2D(2, 2))
+                                                        model.add(layers.Conv2D(conv2d3[cv2d3], 3,
+                                                                                activation=HIDDEN_LAYER_ACTIVATION))
+                                                    model.add(layers.Dropout(dropout2[d2]))
+                                                    model.add(layers.Flatten())
+                                                    model.add(
+                                                        layers.Dense(dense1[de1], activation=HIDDEN_LAYER_ACTIVATION))
+                                                    model.add(layers.Dropout(dropout3[d3]))
+                                                    if de >= 1:
+                                                        model.add(layers.Dense(dense2[de2],
+                                                                               activation=HIDDEN_LAYER_ACTIVATION))
+                                                        model.add(layers.Dropout(dropout3[d4]))
+                                                    model.add(layers.Dense(OUTPUT_NEURON_NUMBER,
+                                                                           activation=OUTPUT_LAYER_ACTIVATION))
 
-print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Saving the best model")
+                                                    # train on the model
+
+                                                    print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[
+                                                          :-1] + f": Compiling model {de1}_{cv2d1}_{cv2d3}_{cv2d2}_{cv2dn}_{d2}_{de2}_{de}_{d1}_{d3}_{d4}_{lr}")
+
+                                                    model.compile(
+                                                        optimizer=keras.optimizers.Adam(learning_rate[lr]),
+                                                        loss=keras.losses.MeanSquaredError(),
+                                                        metrics=[METRICS])
+
+                                                    print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[
+                                                          :-1] + ": Starting the learning")
+
+                                                    history = model.fit(
+                                                        train_generator,
+                                                        epochs=EPOCHS,
+                                                        validation_data=validation_generator,
+                                                        callbacks=[
+                                                            keras.callbacks.EarlyStopping(monitor='val_loss', patience=2,
+                                                                                          mode="min", restore_best_weights=True)]
+                                                    )
+
+                                                    if best_model == 0 or min(
+                                                            history.history['val_loss']) < best_val_accuracy:
+                                                        print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[
+                                                              :-1] + ": Current modell is better, so save it")
+                                                        model_dict.clear()
+                                                        model_dict['de'] = de
+                                                        model_dict['de1'] = dense1[de1]
+                                                        model_dict['de2'] = dense2[de2]
+                                                        model_dict['cv2dn'] = cv2dn
+                                                        model_dict['cv2d1'] = conv2d1[cv2d1]
+                                                        model_dict['cv2d2'] = conv2d2[cv2d2]
+                                                        model_dict['cv2d3'] = conv2d3[cv2d3]
+                                                        model_dict['d1'] = dropout1[d1]
+                                                        model_dict['d2'] = dropout2[d2]
+                                                        model_dict['d3'] = dropout3[d3]
+                                                        model_dict['d4'] = dropout4[d4]
+                                                        model_dict['lr'] = lr
+                                                        best_model = model
+                                                        best_val_accuracy = min(history.history['val_loss'])
+except:
+    print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": An exception has been throwed")
+finally:
+    print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Write the best model into a file")
+
+    best_model.save('./model.hdf5')
+    with open(MODEL_FILE, "w") as file:
+        for key in model_dict.keys():
+            file.write(f"{key}:{model_dict[key]}\n")
