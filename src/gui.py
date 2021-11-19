@@ -4,8 +4,7 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 import sys
 import os
-import cv2
-import preprocessing as prep
+import detection_segmentation as detection
 
 
 class DicePointCounter(QWidget):
@@ -46,7 +45,7 @@ class DicePointCounter(QWidget):
         self.filename = ''
 
     def open_file_clicked(self):
-        self.filename = QFileDialog.getOpenFileName(self, 'Kép megnyitása', os.getcwd(), 'Image files (*.jpg *.gif)')
+        self.filename = QFileDialog.getOpenFileName(self, 'Kép megnyitása', os.getcwd(), 'Image files (*.jpg *.png)')
         self.file_path.setText(self.filename[0])
         pic = QtGui.QPixmap(self.filename[0])
         pic = pic.scaledToWidth(450)
@@ -57,10 +56,7 @@ class DicePointCounter(QWidget):
         if self.filename == '':
             return
         else:
-            image, labels = prep.process_image(self.filename[0])
-            cv2.imshow('image', image)
-            cv2.waitKey()
-            cv2.destroyWindow('image')
+            detection.segment_with_traditional_techniques(self.filename[0])
 
 
 def main():

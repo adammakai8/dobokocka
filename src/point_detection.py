@@ -14,8 +14,3 @@ def count_points(dice):
     debug.imshowAndPause('dice_mask', dice_mask)
     contours, hierarchy = cv2.findContours(dice_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     return 0
-
-
-def point_detection(dice1, dice2):
-
-    return count_points(dice1) + count_points(dice2)
