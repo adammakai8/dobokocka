@@ -1,5 +1,5 @@
 import cv2
-import debug_util as debug
+import debug_logging as debug
 
 
 # TODO: implementáció folytatása a következőképp (az egyes paraméterek finomhangolhatóak):

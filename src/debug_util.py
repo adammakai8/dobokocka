@@ -3,12 +3,7 @@ import numpy as np
 import point_detection as pd
 import tensorflow.keras as ks
 import segmentation as sg
-
-
-def imshowAndPause(winname, image):
-    cv2.imshow(winname, image)
-    cv2.waitKey(0)
-    cv2.destroyWindow(winname)
+import debug_logging as debug
 
 
 def test_point_detection():
@@ -50,10 +45,11 @@ def test_neuron_model():
         result_denorm[i + 1] = temp
 
     d1, d2 = sg.create_segment(result_denorm, image)
-    imshowAndPause('d1', d1)
-    imshowAndPause('d2', d2)
+    debug.imshowAndPause('d1', d1)
+    debug.imshowAndPause('d2', d2)
 
 
 ''' Innentől lehet függvényeket meghívni, de ha más szkriptben használod a debug_util-t, akkor előtte kommentezd
  ki ezeket a hívásokat '''
 # test_neuron_model()
+test_point_detection()
