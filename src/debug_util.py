@@ -54,4 +54,6 @@ def test_neuron_model():
     imshowAndPause('d2', d2)
 
 
-test_neuron_model()
+''' Innentől lehet függvényeket meghívni, de ha más szkriptben használod a debug_util-t, akkor előtte kommentezd
+ ki ezeket a hívásokat '''
+# test_neuron_model()
