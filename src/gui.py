@@ -1,10 +1,12 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QFileDialog
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QMessageBox
 import sys
-import os
 import detection_segmentation as detection
+
+IMG_DIR = '../res/images'
+IMG_FORMATS = 'Image files (*.jpg *.png)'
 
 
 class DicePointCounter(QWidget):
@@ -45,18 +47,21 @@ class DicePointCounter(QWidget):
         self.filename = ''
 
     def open_file_clicked(self):
-        self.filename = QFileDialog.getOpenFileName(self, 'Kép megnyitása', os.getcwd(), 'Image files (*.jpg *.png)')
+        self.filename = QFileDialog.getOpenFileName(self, 'Kép megnyitása', IMG_DIR, IMG_FORMATS)
         self.file_path.setText(self.filename[0])
         pic = QtGui.QPixmap(self.filename[0])
         pic = pic.scaledToWidth(450)
         self.pic_priview.setPixmap(pic)
 
     def do_count(self):
-        # TODO: funkció implementálása
         if self.filename == '':
             return
         else:
-            detection.segment_with_traditional_techniques(self.filename[0])
+            msg = QMessageBox(self)
+            pts = detection.segment_with_traditional_techniques(self.filename[0])
+            msg.setText(f'Points Counted: {pts}')
+            msg.setWindowTitle('Point Calculator')
+            msg.show()
 
 
 def main():
