@@ -3,6 +3,8 @@ import copy
 from datetime import datetime
 
 import pandas as pd
+from matplotlib import pyplot
+from matplotlib import image
 
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -197,6 +199,11 @@ try:
                                                         model_dict['lr'] = lr
                                                         best_model = model
                                                         best_val_accuracy = min(history.history['val_loss'])
+
+                                                        best_model.save('./model.hdf5')
+                                                        with open(MODEL_FILE, "w") as file:
+                                                            for key in model_dict.keys():
+                                                                file.write(f"{key}:{model_dict[key]}\n")
 except:
     print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": An exception has been throwed")
 finally:
