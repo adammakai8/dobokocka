@@ -5,8 +5,6 @@ from numpy import expand_dims
 from keras.models import load_model
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
-from matplotlib import pyplot
-from matplotlib.patches import Rectangle
 
 
 class BoundBox:
@@ -153,32 +151,6 @@ def get_boxes(boxes, labels, thresh):
     return v_boxes, v_labels, v_scores
 
 
-# draw all results
-def draw_boxes(filename, v_boxes, v_labels, v_scores):
-    # load the image
-    data = pyplot.imread(filename)
-    # plot the image
-    pyplot.imshow(data)
-    # get the context for drawing boxes
-    ax = pyplot.gca()
-    # plot each box
-    for i in range(len(v_boxes)):
-        box = v_boxes[i]
-        # get coordinates
-        y1, x1, y2, x2 = box.ymin, box.xmin, box.ymax, box.xmax
-        # calculate width and height of the box
-        width, height = x2 - x1, y2 - y1
-        # create the shape
-        rect = Rectangle((x1, y1), width, height, fill=False, color='white')
-        # draw the box
-        ax.add_patch(rect)
-        # draw text and score in top left corner
-        label = "%s (%.3f)" % (v_labels[i], v_scores[i])
-        pyplot.text(x1, y1, label, color='white')
-    # show the plot
-    pyplot.show()
-
-
 def predict_bounding_boxes(photo_filename):
     # load yolov3 model
     model = load_model('../res/data/model')
@@ -188,8 +160,6 @@ def predict_bounding_boxes(photo_filename):
     image, image_w, image_h = load_image_pixels(photo_filename, (input_w, input_h))
     # make prediction
     yhat = model.predict(image)
-    # summarize the shape of the list of arrays
-    print([a.shape for a in yhat])
     # define the anchors
     anchors = [[116, 90, 156, 198, 373, 326], [30, 61, 62, 45, 59, 119], [10, 13, 16, 30, 33, 23]]
     # define the probability threshold for detected objects
@@ -247,6 +217,3 @@ def predict_bounding_boxes(photo_filename):
         boxes.append(tmp)
 
     return boxes
-
-
-print(predict_bounding_boxes('../res/preprocessed/13_230_61_267_325_185_375_222_0_3.png'))
