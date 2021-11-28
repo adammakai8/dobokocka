@@ -1,27 +1,8 @@
+""" A kivágott kockákat tartalmazó részképletek feldolgozását, pontok számolását végző modul """
 import cv2
-import debug_logging as debug
 
 
 def count_points(dice):
-    def get_x(contour):
-        x, y, w, h = cv2.boundingRect(contour)
-        return x
-
-    def get_x_w(contour):
-        x, y, w, h = cv2.boundingRect(contour)
-        return x + w
-
-    def get_y(contour):
-        x, y, w, h = cv2.boundingRect(contour)
-        return y
-
-    def get_y_h(contour):
-        x, y, w, h = cv2.boundingRect(contour)
-        return y + h
-
-    def is_contour_on_upper_half(contour):
-        x, y, w, h = cv2.boundingRect(contour)
-        return y + h <= dice.shape[0] * 0.5
 
     def is_overlapping(contour, prev_contours):
         x, y, w, h = cv2.boundingRect(contour)
@@ -40,7 +21,6 @@ def count_points(dice):
             if img_area / min_area_ratio < cv2.contourArea(cont) < img_area / 3 \
                     and cv2.contourArea(cont) / cv2.arcLength(cont, True) ** 2 > 0.055 \
                     and not is_overlapping(cont, selected_contours):
-                # debug.showContour(dice_mask, cont)
                 selected_contours.append(cont)
         return selected_contours
 
@@ -55,12 +35,4 @@ def count_points(dice):
         cv2.medianBlur(dice, 3), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, blockSize, C)
     contours, hierarchy = cv2.findContours(dice_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     selected = examine_contours(contours)
-    if len(selected) > 1:
-        min_x = min(map(get_x, selected))
-        max_x = max(map(get_x_w, selected))
-        min_y = min(map(get_y, selected))
-        max_y = max(map(get_y_h, selected))
-        dice_mask = dice_mask[min_x - 3:max_x + 3, min_y - 3:max_y + 3]
-        if dice_mask.shape[0] > dice_mask.shape[1]:
-            selected = list(filter(is_contour_on_upper_half, selected))
     return len(selected)

@@ -6,6 +6,8 @@ from keras.models import load_model
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
+from constants import DATA_PATH
+
 
 class BoundBox:
     def __init__(self, xmin, ymin, xmax, ymax, objness=None, classes=None):
@@ -153,7 +155,7 @@ def get_boxes(boxes, labels, thresh):
 
 def predict_bounding_boxes(photo_filename):
     # load yolov3 model
-    model = load_model('../res/data/model')
+    model = load_model(f'{DATA_PATH}/model')
     # define the expected input shape for the model
     input_w, input_h = 416, 416
     # load and prepare image

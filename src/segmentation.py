@@ -4,6 +4,8 @@ import cv2
 from os import listdir
 from os import mkdir
 
+import debug_logging as debug
+
 prep_dir = '../res/preprocessed/'
 seg_dir = '../res/segmented/'
 
@@ -28,9 +30,9 @@ def create_and_save_segments_from_preprocessed():
 
 
 def create_segment(coordinates, image):
-    dice1 = image[coordinates[1]:coordinates[3], coordinates[0]:coordinates[2]]
-    dice2 = image[coordinates[5]:coordinates[7], coordinates[4]:coordinates[6]]
-    return dice1, dice2
+    dice = image[coordinates[1]:coordinates[3], coordinates[0]:coordinates[2]]
+    debug.imshowAndPause('test', dice)
+    return dice
 
 
 # Ha külön akartok szegmenseket kimenteni tesztadatként az alsó sor kommentezzétek ki
