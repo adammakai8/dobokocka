@@ -8,6 +8,8 @@ from keras.preprocessing.image import img_to_array
 
 from constants import DATA_PATH
 
+# load yolov3 model
+model = load_model(f'{DATA_PATH}/model')
 
 class BoundBox:
     def __init__(self, xmin, ymin, xmax, ymax, objness=None, classes=None):
@@ -101,6 +103,8 @@ def bbox_iou(box1, box2):
     w1, h1 = box1.xmax - box1.xmin, box1.ymax - box1.ymin
     w2, h2 = box2.xmax - box2.xmin, box2.ymax - box2.ymin
     union = w1 * h1 + w2 * h2 - intersect
+    if union == 0:
+        return float('inf')
     return float(intersect) / union
 
 
@@ -154,8 +158,6 @@ def get_boxes(boxes, labels, thresh):
 
 
 def predict_bounding_boxes(photo_filename):
-    # load yolov3 model
-    model = load_model(f'{DATA_PATH}/model')
     # define the expected input shape for the model
     input_w, input_h = 416, 416
     # load and prepare image
@@ -165,49 +167,48 @@ def predict_bounding_boxes(photo_filename):
     # define the anchors
     anchors = [[116, 90, 156, 198, 373, 326], [30, 61, 62, 45, 59, 119], [10, 13, 16, 30, 33, 23]]
     # define the probability threshold for detected objects
-    v_boxes = []
-    substract = 0
     radius = 10
-    while len(v_boxes) < 2:
-        class_threshold = 0.05 - substract
-        if class_threshold == 0.0:
-            raise Exception("Cannot find dices on the image")
-        substract += 0.1
-        boxes = list()
-        for i in range(len(yhat)):
-            # decode the output of the network
-            boxes += decode_netout(yhat[i][0], anchors[i], class_threshold, input_h, input_w)
-        # correct the sizes of the bounding boxes for the shape of the image
-        correct_yolo_boxes(boxes, image_h, image_w, input_h, input_w)
-        # suppress non-maximal boxes
-        do_nms(boxes, 0.5)
-        # define the labels
-        labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck",
-                  "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
-                  "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe",
-                  "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard",
-                  "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-                  "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana",
-                  "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake",
-                  "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse",
-                  "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
-                  "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
-        # get the details of the detected objects
-        v_boxes, v_labels, v_scores = get_boxes(boxes, labels, class_threshold)
+    class_threshold = 0.02
+    boxes = list()
+    for i in range(len(yhat)):
+        # decode the output of the network
+        boxes += decode_netout(yhat[i][0], anchors[i], class_threshold, input_h, input_w)
+    # correct the sizes of the bounding boxes for the shape of the image
+    correct_yolo_boxes(boxes, image_h, image_w, input_h, input_w)
+    # suppress non-maximal boxes
+    do_nms(boxes, 0.5)
+    # define the labels
+    labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck",
+              "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
+              "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe",
+              "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard",
+              "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+              "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana",
+              "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake",
+              "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse",
+              "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
+              "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
+    # get the details of the detected objects
+    v_boxes, v_labels, v_scores = get_boxes(boxes, labels, class_threshold)
     # if we found more than 2 dices
+    index = 1
+    if len(v_boxes) <= 1:
+        raise Exception('Not enough dices were found!')
     if len(v_boxes) > 2:
         foundLappingBoxes = False
-        for i in range(1, len(v_boxes)):
-            x1, y1 = v_boxes[i].xmin, v_boxes[i].ymin
-            for j in range(i):
+        while index < len(v_boxes):
+            x1, y1 = v_boxes[index].xmin, v_boxes[index].ymin
+            for j in range(index):
                 x1o, y1o = v_boxes[j].xmin, v_boxes[j].ymin
                 if abs(x1o - x1) <= radius and abs(y1o - y1) <= radius:
                     foundLappingBoxes = True
             if foundLappingBoxes:
                 foundLappingBoxes = False
-                v_boxes.pop(i)
+                v_boxes.pop(index)
+                index -= 1
+            index += 1
     # increase the size of the bounding boxes with 'size'
-    size = 5
+    size = 15
     boxes = []
     for box in v_boxes:
         x1, y1, x2, y2 = box.xmin, box.ymin, box.xmax, box.ymax

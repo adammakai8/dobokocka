@@ -31,7 +31,6 @@ def create_and_save_segments_from_preprocessed():
 
 def create_segment(coordinates, image):
     dice = image[coordinates[1]:coordinates[3], coordinates[0]:coordinates[2]]
-    debug.imshowAndPause('test', dice)
     return dice
 
 

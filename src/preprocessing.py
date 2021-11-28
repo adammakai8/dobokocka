@@ -17,8 +17,6 @@ def process_image(path):
     """
     if path.count('/') > 0 or path.count('\\') > 0:
         path.replace('\\', '/')
-    else:
-        path = f'{IMG_PATH}{path}'
     image = cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     shape = image.shape

@@ -20,6 +20,7 @@ def _normalize_image_names():
     for image in images_names:
         columns = [int(item) for item in image.split(".")[0].split("_")]
         columns.pop()
+        columns.pop()
         columns = np.array(columns)
         images_array.append(columns)
 

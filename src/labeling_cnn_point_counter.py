@@ -28,7 +28,7 @@ _TRAIN_PCT = 0.9
 
 print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Preloading...")
 
-os.chdir(IMAGES_PATH)
+
 
 # load the images, and labels
 
@@ -71,60 +71,46 @@ test_labels = np.array(test_labels)
 
 print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Creating the model...")
 
-# model = keras.Sequential([
-#     layers.Dropout(0.3, input_shape=(TRAIN_WIDTH, TRAIN_HEIGHT, 1)),
-#     layers.AveragePooling2D(2, 2),
-#     layers.Conv2D(32, 3, activation=HIDDEN_LAYER_ACTIVATION,
-#                   kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
-#                   bias_regularizer=regularizers.l2(1e-4),
-#                   activity_regularizer=regularizers.l2(1e-5)),
-#     layers.AveragePooling2D(2, 2),
-#     layers.Dropout(0.3),
-#     layers.Conv2D(16, 3, activation=HIDDEN_LAYER_ACTIVATION,
-#                   kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
-#                   bias_regularizer=regularizers.l2(1e-4),
-#                   activity_regularizer=regularizers.l2(1e-5)),
-#     layers.AveragePooling2D(2, 2),
-#     layers.Dropout(0.3),
-#     layers.Conv2D(8, 3, activation=HIDDEN_LAYER_ACTIVATION,
-#                   kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
-#                   bias_regularizer=regularizers.l2(1e-4),
-#                   activity_regularizer=regularizers.l2(1e-5)),
-#     layers.Dropout(0.3),
-#     layers.Flatten(),
-#     layers.Dense(256, activation=HIDDEN_LAYER_ACTIVATION,
-#                  kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
-#                  bias_regularizer=regularizers.l2(1e-4),
-#                  activity_regularizer=regularizers.l2(1e-5)),
-#     layers.Dropout(0.3),
-#     layers.Dense(512, activation=HIDDEN_LAYER_ACTIVATION,
-#                  kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
-#                  bias_regularizer=regularizers.l2(1e-4),
-#                  activity_regularizer=regularizers.l2(1e-5)),
-#     layers.Dense(1, activation=OUTPUT_LAYER_ACTIVATION)
-# ])
-
-model = keras.models.Sequential()
-model.add(keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu', input_shape=(TRAIN_WIDTH, TRAIN_HEIGHT, 1)))
-model.add(keras.layers.Conv2D(32, kernel_size=(5, 5), strides=(2, 2), padding='same', activation='relu'))
-model.add(keras.layers.Conv2D(32, kernel_size=(5, 5), strides=(2, 2), padding='same', activation='relu'))
-model.add(keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(2, 2), padding='same', activation='relu'))
-model.add(keras.layers.Flatten())
-model.add(keras.layers.Dense(2048, activation='relu'))
-model.add(keras.layers.Dense(1024, activation='relu'))
-model.add(keras.layers.Dense(1, activation='linear'))
+model = keras.Sequential([
+    layers.Dropout(0.3, input_shape=(TRAIN_WIDTH, TRAIN_HEIGHT, 1)),
+    layers.AveragePooling2D(2, 2),
+    layers.Conv2D(32, 3, activation=HIDDEN_LAYER_ACTIVATION,
+                  kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
+                  bias_regularizer=regularizers.l2(1e-4),
+                  activity_regularizer=regularizers.l2(1e-5)),
+    layers.AveragePooling2D(2, 2),
+    layers.Dropout(0.3),
+    layers.Conv2D(16, 3, activation=HIDDEN_LAYER_ACTIVATION,
+                  kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
+                  bias_regularizer=regularizers.l2(1e-4),
+                  activity_regularizer=regularizers.l2(1e-5)),
+    layers.AveragePooling2D(2, 2),
+    layers.Dropout(0.3),
+    layers.Conv2D(8, 3, activation=HIDDEN_LAYER_ACTIVATION,
+                  kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
+                  bias_regularizer=regularizers.l2(1e-4),
+                  activity_regularizer=regularizers.l2(1e-5)),
+    layers.Dropout(0.3),
+    layers.Flatten(),
+    layers.Dense(256, activation=HIDDEN_LAYER_ACTIVATION,
+                 kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
+                 bias_regularizer=regularizers.l2(1e-4),
+                 activity_regularizer=regularizers.l2(1e-5)),
+    layers.Dropout(0.3),
+    layers.Dense(512, activation=HIDDEN_LAYER_ACTIVATION,
+                 kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
+                 bias_regularizer=regularizers.l2(1e-4),
+                 activity_regularizer=regularizers.l2(1e-5)),
+    layers.Dense(1, activation=OUTPUT_LAYER_ACTIVATION)
+])
 
 # train on the model
 
 print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Compiling model")
 
-# model.compile(
-#     optimizer=keras.optimizers.Adam(),
-#     loss=keras.losses.MeanSquaredError())
-
-model.compile(optimizer=keras.optimizers.Adam(0.001),
-              metrics=['accuracy'],
-              loss='sparse_categorical_crossentropy')
+model.compile(
+    optimizer=keras.optimizers.Adam(),
+    loss=keras.losses.MeanSquaredError())
 
 print(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f:')[:-1] + ": Starting the learning")
 

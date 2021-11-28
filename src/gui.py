@@ -66,11 +66,17 @@ class DicePointCounter(QWidget):
             msg = QMessageBox(self)
             if self.use_cnn_cb.isChecked():
                 wait_msg = QMessageBox(self)
-                wait_msg.buttons().clear()
                 wait_msg.setText(WAIT_TEXT)
                 wait_msg.setWindowTitle(WAIT_TITLE)
                 wait_msg.show()
-                pts = detection.segment_with_cnn(self.filename[0])
+                try:
+                    pts = detection.segment_with_cnn(self.filename[0])
+                except Exception as e:
+                    warning_msg = QMessageBox(self)
+                    warning_msg.setText(e)
+                    warning_msg.setWindowTitle(e)
+                    warning_msg.show()
+                    pts = 0
                 wait_msg.close()
             else:
                 pts = detection.segment_with_traditional_techniques(self.filename[0])
